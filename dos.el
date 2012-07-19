@@ -107,37 +107,55 @@ that:\n
   :tag   "Hook"
   :type  'hook
   :group 'dos)
-(defface dos-label-face '((t :weight bold)) "Font Lock mode face used to highlight Dos labels." :group 'dos)
 
+(defface dos-mode-label-face '((t :weight bold :inherit 'default)) "Font fase: dos-mode labels." :group 'dos)
+(defface dos-mode-param-face '((t :inherit 'font-lock-warning-face)) "Font face: dos-mode command line params." :group 'dos)
 ;; 3  Internal variables
 
-(defvar dos-font-lock-keywords
-  (eval-when-compile
-    (let ((COMMANDS
-           '("md" "mkdir" "rd" "rmdir" "ren" "rename" "copy" "del" "move" "erase" ; file system modify
+(defvar dos-font-lock-keywords (eval-when-compile (
+  let (
+       (COMMANDS '(
+	     "md" "mkdir" "rd" "rmdir" "ren" "rename" "copy" "del" "move" "erase" ; file system modify
              "dir" "cd" "chdir" "pushd" "popd" ; file system navigate
              "title" "color" "prompt" "cls" ; cmd appearance
              "date" "time" "path" "pause" "type" ;misc
-             ))
-          (CONTROLFLOW
-           '("call"     "do"       "else"     "equ"      "exit"     "for"      "geq"      "goto"     "gtr" 
+       ))
+       (CONSTANTS '(
+	     "ENABLEEXTENSIONS" "DISABLEDELAYEDEXPANSION"
+       ))
+       (CONTROLFLOW '(
+	     "call" "do" "goto" "exit" "start"          "equ" "neq" "geq" "leq" "gtr" "lss"
              "set" "setlocal" "endlocal" "shift" "echo"
-             "if"       "in"       "leq"      "lss"      "neq"      "not"      "start"    "defined"  "exist")))
-      (list
-       '("^[ \t]*\\(@?rem\\>\\|::\\).*"              (0 font-lock-comment-face t))
-       '("echo \\(.*\\)$"                            (1 font-lock-string-face))
-       '("%%\\(\\w+\\)"                              (0 font-lock-variable-name-face t))
-       '("%~\\w+"                                    (0 font-lock-variable-name-face t))
-       '("%[0-9]"                                    (0 font-lock-warning-face t))
-       '("%\\(\\w+\\)%"                              (0 font-lock-preprocessor-face t))
-       '("!\\(\\w+\\)!"                              (0 font-lock-preprocessor-face t))
+             "if" "else" "for" "in" "defined" "exist" "not" "eof"
+       )))
+
+  (list
+       '("%"                           (0 font-lock-variable-name-face t))
+       '("%%~?\\w+"                    (0 font-lock-variable-name-face t))
+       '("%[0-9]"                      (0 'dos-mode-param-face t))
+       '("%~\\w*[0-9]"                 (0 'dos-mode-param-face t))
+
+       '("%\\w+%"                      (0 font-lock-preprocessor-face t))
+       '("!\\w+!"                      (0 font-lock-preprocessor-face t))
+       '("%\\w+:[^=\n]+=[^%\n]*%"      (0 font-lock-preprocessor-face t))
+       '("!\\w+:[^=\n]+=[^!\n]*!"      (0 font-lock-preprocessor-face t))
+       '("%\\w+:~[0-9,-]+%"            (0 font-lock-preprocessor-face t))
+       '("!\\w+:~[0-9,-]+!"            (0 font-lock-preprocessor-face t))
+
        '("\\<\\(call\\|goto\\)\\>[ \t]+%?\\([A-Za-z0-9-_\\:.]+\\)%?" (2 font-lock-constant-face t))
-       '("^:[^:].*" .                                   'dos-label-face)
        '("\\<\\(defined\\|set\\)\\>[ \t]*\\(\\w+\\)" (2 font-lock-preprocessor-face))
-       '("[ =][-/]+\\(\\w+\\)"                       (1 font-lock-type-face append))
+       '("[ =][-/]+\\([^ \n]+\\)"                       (1 font-lock-type-face append))
+
        (cons (regexp-opt COMMANDS    'words) font-lock-builtin-face)
        (cons (regexp-opt CONTROLFLOW 'words) font-lock-keyword-face)
-       ))))
+       (cons (regexp-opt CONSTANTS   'words) font-lock-preprocessor-face)
+
+       '("^:[^:].*"                                    (0 'dos-mode-label-face t))
+       '("^[ \t]*\\(@?rem\\>\\|::\\).*"              (0 font-lock-comment-face t))
+       '("^[ \t]*@?echo \\(.*\\)$"                            (1 font-lock-string-face keep))
+       )
+)))
+
 (defvar dos-menu
   '("Dos"
     ["Run"           dos-run          ] ; :help "Run script"
