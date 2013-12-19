@@ -121,7 +121,7 @@ that:\n
              "date" "time" "path" "pause" "type" ;misc
        ))
        (CONSTANTS '(
-	     "ENABLEEXTENSIONS" "DISABLEDELAYEDEXPANSION"
+	     "ENABLEEXTENSIONS" "DISABLEDELAYEDEXPANSION" "EnableDelayedExpansion" "errorlevel"
        ))
        (CONTROLFLOW '(
 	     "call" "do" "goto" "exit" "start"          "equ" "neq" "geq" "leq" "gtr" "lss"
@@ -135,24 +135,26 @@ that:\n
        '("%[0-9]"                      (0 'dos-mode-param-face t))
        '("%~\\w*[0-9]"                 (0 'dos-mode-param-face t))
 
-       '("%\\w+%"                      (0 font-lock-preprocessor-face t))
-       '("!\\w+!"                      (0 font-lock-preprocessor-face t))
-       '("%\\w+:[^=\n]+=[^%\n]*%"      (0 font-lock-preprocessor-face t))
-       '("!\\w+:[^=\n]+=[^!\n]*!"      (0 font-lock-preprocessor-face t))
-       '("%\\w+:~[0-9,-]+%"            (0 font-lock-preprocessor-face t))
-       '("!\\w+:~[0-9,-]+!"            (0 font-lock-preprocessor-face t))
+       '("%[A-Za-z0-9-_.()]+%"                      (0 font-lock-preprocessor-face t))
+       '("![A-Za-z0-9-_.()]+!"                      (0 font-lock-preprocessor-face t))
+       '("%[A-Za-z0-9-_.()]+:[^=\n]+=[^%\n]*%"      (0 font-lock-preprocessor-face t))
+       '("![A-Za-z0-9-_.()]+:[^=\n]+=[^!\n]*!"      (0 font-lock-preprocessor-face t))
+       '("%[A-Za-z0-9-_.()]+:~[0-9,-]+%"            (0 font-lock-preprocessor-face t))
+       '("![A-Za-z0-9-_.()]+:~[0-9,-]+!"            (0 font-lock-preprocessor-face t))
 
-       '("\\<\\(call\\|goto\\)\\>[ \t]+%?\\([A-Za-z0-9-_\\:.]+\\)%?" (2 font-lock-constant-face t))
-       '("\\<\\(defined\\|set\\)\\>[ \t]*\\(\\w+\\)" (2 font-lock-preprocessor-face))
-       '("[ =][-/]+\\([^ \n]+\\)"                       (1 font-lock-type-face append))
-
+       (cons (regexp-opt CONSTANTS   'words) font-lock-preprocessor-face)
        (cons (regexp-opt COMMANDS    'words) font-lock-builtin-face)
        (cons (regexp-opt CONTROLFLOW 'words) font-lock-keyword-face)
-       (cons (regexp-opt CONSTANTS   'words) font-lock-preprocessor-face)
+
+       '("\\<\\(call\\|goto\\)\\>[ \t]+%?\\([A-Za-z0-9-_\\:.]+\\)%?" (2 font-lock-constant-face t))
+       '("\\<\\(defined\\|set\\)\\>[ \t]*\\([A-Za-z0-9-_.()]+\\)" (2 font-lock-preprocessor-face t))
+       '("[ =][-/]+\\([^ \n]+\\)"                       (1 font-lock-type-face append))
+
 
        '("^:[^:].*"                                    (0 'dos-mode-label-face t))
        '("^[ \t]*\\(@?rem\\>\\|::\\).*"              (0 font-lock-comment-face t))
-       '("^[ \t]*@?echo \\(.*\\)$"                            (1 font-lock-string-face keep))
+       '("^[ \t]*@?echo \\(.*\\)$"                            (1 font-lock-string-face append))
+
        )
 )))
 
